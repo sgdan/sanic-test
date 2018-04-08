@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Sanic Test</title>
+
+  <link href="{{ static('bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ css('sticky-footer-navbar.css') }}" rel="stylesheet">
+  <link href="{{ css('grid.css') }}" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="/">Sanic-Test</a>
+      <div class="collapse navbar-collapse" id="totals_div">
+        <ul class="navbar-nav">
+          {% for task, n in totals.items() %}
+          <li class="nav-link">{{ task }} done: {{ n }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main role="main" class="container">
+    <h1 class="mt-5">Testing the Sanic framework</h1>
+    <br>
+    <form class="form-inline mt-2 mt-md-0">
+      <select class="form-control mr-sm-2" name="taskname">
+        {% for c in chores %}
+        <option{% if taskname==c %} selected{% endif %} value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+      </select>
+      <select class="form-control mr-sm-2" name="time">
+        {% for x in range(5,25,5) %}
+        <option{% if time==x|string %} selected{% endif %} value="{{ x }}">{{ x }}</option>
+          {% endfor %}
+      </select>
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Start Task</button>
+    </form>
+
+    <br>
+
+    <div class="lead my-2 my-sm-0" id="tasks_div">
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span class="text-muted">See
+        <a href="https://github.com/sgdan/sanic-test">source code on GitHub</a>.
+        EXAMPLE_SECRET is <i>{{ eg_secret }}</i>,
+        EXAMPLE_ENVIRONMENT_VARIABLE is <i>{{ eg_env }}</i>
+      </span>
+    </div>
+  </footer>
+
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="{{ static('jquery.min.js') }}"></script>
+  <script src="{{ static('popper.min.js') }}"></script>
+  <script src="{{ static('bootstrap.min.js') }}"></script>
+  <script>
+    function update() {
+      update_totals();
+      update_tasks();
+    }
+    function update_tasks() {
+      $.getJSON("/tasks", function (tasks) {
+        txt = '<div class="lead my-2 my-sm-0">'
+        for (let task of tasks) {
+          txt += '<div class="row">' +
+            '<div class="col-4">' + task['name'] + '</div>' +
+            '<div class="col-4">' + task['remaining'] + 's remaining</div>' +
+            '</div>'
+        }
+        txt += '</div>'
+        $("#tasks_div").html(txt);
+        if (tasks.length > 0) window.setTimeout(update, 1000);
+      });
+    }
+
+    function update_totals() {
+      $.getJSON("/totals", function (totals) {
+        txt = '<ul class="navbar-nav">'
+        for (let task in totals) {
+          txt += '<li class="nav-link">' + task + ' done: ' + totals[task] + '</li>'
+        }
+        txt += '</ul>'
+        $("#totals_div").html(txt);
+      });
+    }
+
+    update_tasks();
+  </script>
+</body>
+
+</html>
