@@ -6,9 +6,9 @@ implementation of Python3's [asyncio](https://github.com/python/cpython/tree/3.6
 This means you can take advantage of async/await style code from Python 3.5+ which is a coroutine
 approach within a single process (rather than a multi-process approach).
 
-See the [dev.sh] script which can be used to build and run in debug mode. After running
+See the [dev.sh](dev.sh) script which can be used to build and run in debug mode. After running
 the script, go to http://localhost:5000 to see the app. By default it runs in debug mode
-and reloads whenever source files are changed. There's also a [run.sh] script showing how
+and reloads whenever source files are changed. There's also a [run.sh](run.sh) script showing how
 it can be run without the reloading.
 
 ## Features
