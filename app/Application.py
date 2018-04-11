@@ -24,29 +24,25 @@ home_template = env.get_template('home.html')
 
 
 async def storeTotals(totals):
-    with await file_lock:
-        pickle.dump(totals, open('totals.p', 'wb'))
+    pickle.dump(totals, open('totals.p', 'wb'))
 
 
 async def getTotals():
-    with await cache_lock:
-        return cache.get('totals', {c: 0 for c in chores})
+    return cache.get('totals', {c: 0 for c in chores})
 
 
 async def incTotal(name):
-    with await cache_lock:
-        totals = cache.get('totals', {c: 0 for c in chores})
-        totals[name] = totals[name] + 1
-        cache.totals = totals
+    totals = cache.get('totals', {c: 0 for c in chores})
+    totals[name] = totals[name] + 1
+    cache.totals = totals
     # update the file store
     asyncio.ensure_future(storeTotals(totals))
 
 
 async def addTask(name, duration):
     t = Task(name, int(time.time()), duration)
-    with await cache_lock:
-        tasks = cache.get('tasks', ()) + (t,)
-        cache.tasks = tasks
+    tasks = cache.get('tasks', ()) + (t,)
+    cache.tasks = tasks
     asyncio.ensure_future(doTask(t))
 
 
@@ -58,10 +54,9 @@ async def doTask(task):
     await incTotal(task.name)
 
     # remove the task
-    with await cache_lock:
-        tasks = cache.get('tasks', ())
-        tasks = tuple(t for t in tasks if t is not task)
-        cache.tasks = tasks
+    tasks = cache.get('tasks', ())
+    tasks = tuple(t for t in tasks if t is not task)
+    cache.tasks = tasks
 
 
 @app.route('/')
@@ -82,8 +77,7 @@ async def home(request):
 
 @app.route('/tasks')
 async def tasks(request):
-    with await cache_lock:
-        tasks = cache.get('tasks', ())
+    tasks = cache.get('tasks', ())
     now = int(time.time())
 
     def remaining(x): return x.duration - (now - x.start)
@@ -105,22 +99,10 @@ def css(filename):
 
 @app.listener('after_server_start')
 async def after(app, loop):
-    '''
-    Locks need to be created here otherwise they will be associated
-    with the previous event loop (since Sanic starts its own event
-    loop when the run method is called).
-    '''
-    global cache_lock
-    cache_lock = asyncio.Lock()
-    global file_lock
-    file_lock = asyncio.Lock()
-
     try:
         # Load totals and update cache
-        with await file_lock:
-            totals = pickle.load(open('totals.p', 'rb'))
-        with await cache_lock:
-            cache.totals = totals
+        totals = pickle.load(open('totals.p', 'rb'))
+        cache.totals = totals
     except:
         print(f'Unable to load totals from file')
 
