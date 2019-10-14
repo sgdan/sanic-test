@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+  sanic-test:
+    image: sanic-test
+    environment:
+      - SANIC_DEBUG=True
+      - EXAMPLE_ENVIRONMENT_VARIABLE=some-example-value
+    volumes:
+      - ./app:/wserver/app
+      - ./.secrets:/run/secrets
